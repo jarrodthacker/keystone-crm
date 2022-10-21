@@ -13,28 +13,80 @@ generator client {
 }
 
 model User {
-  id       String @id @default(cuid())
-  name     String @default("")
-  email    String @unique @default("")
-  password String
-  posts    Post[] @relation("Post_author")
+  id              String           @id @default(cuid())
+  name            String           @default("")
+  email           String           @unique @default("")
+  password        String
+  supportRequests SupportRequest[] @relation("SupportRequest_technician")
 }
 
-model Post {
-  id          String    @id @default(cuid())
-  title       String    @default("")
-  status      String?   @default("draft")
-  content     String    @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
-  publishDate DateTime?
-  author      User?     @relation("Post_author", fields: [authorId], references: [id])
-  authorId    String?   @map("author")
-  tags        Tag[]     @relation("Post_tags")
-
-  @@index([authorId])
+model Organization {
+  id              String           @id @default(cuid())
+  name            String           @default("")
+  contacts        Contact[]        @relation("Contact_organization")
+  funding         Funding[]        @relation("Funding_organization")
+  requirements    Requirement[]    @relation("Requirement_organization")
+  city            String           @default("")
+  state           String           @default("")
+  country         String           @default("")
+  joined          String?
+  supportRequests SupportRequest[] @relation("SupportRequest_organization")
 }
 
-model Tag {
-  id    String @id @default(cuid())
-  name  String @default("")
-  posts Post[] @relation("Post_tags")
+model SupportRequest {
+  id             String        @id @default(cuid())
+  name           String        @default("")
+  issue          String        @default("")
+  date           DateTime?
+  status         String?       @default("Unresolved")
+  organization   Organization? @relation("SupportRequest_organization", fields: [organizationId], references: [id])
+  organizationId String?       @map("organization")
+  technician     User?         @relation("SupportRequest_technician", fields: [technicianId], references: [id])
+  technicianId   String?       @map("technician")
+
+  @@index([organizationId])
+  @@index([technicianId])
+}
+
+model Requirement {
+  id             String        @id @default(cuid())
+  name           String        @default("")
+  description    String        @default("")
+  date           String?
+  status         String?       @default("Unresolved")
+  jiraUrl        String        @default("")
+  application    String        @default("")
+  organization   Organization? @relation("Requirement_organization", fields: [organizationId], references: [id])
+  organizationId String?       @map("organization")
+  contact        Contact?      @relation("Requirement_contact", fields: [contactId], references: [id])
+  contactId      String?       @map("contact")
+
+  @@index([organizationId])
+  @@index([contactId])
+}
+
+model Contact {
+  id             String        @id @default(cuid())
+  name           String        @default("")
+  type           String?       @default("other")
+  unsecurePhone  String        @default("")
+  unsecureEmail  String        @default("")
+  securePhone    String        @default("")
+  secureEmail    String        @default("")
+  organization   Organization? @relation("Contact_organization", fields: [organizationId], references: [id])
+  organizationId String?       @map("organization")
+  requirements   Requirement[] @relation("Requirement_contact")
+
+  @@index([organizationId])
+}
+
+model Funding {
+  id             String        @id @default(cuid())
+  organization   Organization? @relation("Funding_organization", fields: [organizationId], references: [id])
+  organizationId String?       @map("organization")
+  amount         Int?
+  date           String?
+  fiscalYear     Int?
+
+  @@index([organizationId])
 }

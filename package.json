@@ -9,6 +9,7 @@
     "postinstall": "keystone postinstall"
   },
   "dependencies": {
+    "@aws-sdk/util-endpoints": "^3.192.0",
     "@keystone-6/auth": "^4.0.0",
     "@keystone-6/core": "^2.1.0",
     "@keystone-6/fields-document": "^4.0.1",
